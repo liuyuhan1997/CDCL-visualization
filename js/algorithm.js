@@ -144,9 +144,10 @@ async function BCP(F, A) {
                 if (countDecisionsInA(A) == 0) {
                     //conflict found when no assignment => UNSAT, add the backdrop before dialog close 
                     showConflictModal(clause);
-                    document.getElementById('ConflictModal').style.zIndex = 1030
+                    document.getElementById('ConflictModal').style.zIndex = 1030;
                     $('.modal-backdrop').addClass('red-backdrop');
                     $('#confirmModal').modal('show');
+                    readUtterance("Conflict found at level 0. UNSAT!");
                 }
                 await conflictFind(clause);
                 return 'conflict';
@@ -176,12 +177,12 @@ function unitFind(clause, literal, assign) {
     });
 }
 
-function conflictFind(clause) {
+function conflictFind(clause, read = true) {
     return new Promise((resolve) => {
         window.conflictCallback = () => {
             resolve();  // Resume the algorithm with the user's decision
         };
-        showConflictModal(clause);
+        showConflictModal(clause, read);
     });
 }
 

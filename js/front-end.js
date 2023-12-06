@@ -120,12 +120,14 @@ function setNodeColor(nodeId, color) {
 
 function showDecisionModal(literal, modalId) {
     document.getElementById('decisionLiteral').innerHTML = literal;
+    readUtterance("Make a decision for literal " + literal);
     $('#' + modalId).modal('show');
 }
 function userDecide(value) {
     var assign = document.getElementById('decisionLiteral').innerHTML;
     document.getElementById('decisions').innerHTML += '<p>' + assign + ' = ' + value + '</p>';
     document.getElementById('process').innerHTML += '<p> Decision: ' + assign + ' = ' + value + '</p>';
+    readUtterance(assign + ' = ' + value);
     userDecisionCallback(value);
     setNodeColor(assign, '#87A96B');
     showNode(assign);
@@ -137,7 +139,10 @@ function showBCPModal(clause, unitLiteral, assign) {
     document.getElementById('process').innerHTML += '<p> BCP: ' + unitLiteral + ' = ' + assign + '</p>';
     var uid = Date.now().toString();
     document.getElementById('BCPModals').innerHTML += generateNewBCPModal(uid);
-    document.getElementById('BCPResult' + uid).innerHTML = "<p>Running BCP, unit clause find: " + clause + "</p><p>Assign " + unitLiteral + " = " + assign + "</p>";
+    document.getElementById('BCPResult' + uid).innerHTML = "<p>Running BCP, unit clause found: " + clause + "</p><p>Assign " + unitLiteral + " = " + assign + "</p>";
+    readUtterance("Unit Clause found");
+    readUtterance(readNot(clause));
+    readUtterance("Assign " + unitLiteral + " = " + assign);
     $('#BCPModal' + uid).modal('show');
     for (let literal of clause.literals) {
         if (literal.name != unitLiteral) {
@@ -176,7 +181,11 @@ function closeBCPModal(buttonElement) {
     unitCallback(true)
 }
 
-function showConflictModal(clause) {
+function showConflictModal(clause, read = true) {
+    if (read) {
+        readUtterance("Conflict found");
+        readUtterance(readNot(clause));
+    }
     document.getElementById('ConflictResult').innerHTML = "<p>Conflict clause: " + clause + "</p>";
     document.getElementById('process').innerHTML += '<p> Conflict found: ' + clause + '</p>';
     showNode('k');
@@ -190,6 +199,8 @@ function showUIPModal(uip) {
     var nodeID = uip.replaceAll('¬', '');
     document.getElementById('FirstUIPResult').innerHTML = "<p>First UIP: " + uip + "</p>";
     document.getElementById('process').innerHTML += '<p> First UIP found: ' + uip + '</p>';
+    readUtterance("First UIP");
+    readUtterance(readNot(uip));
     setNodeColor(nodeID, '#F0E68C');
     $('#UIPModal').modal('show');
 }
@@ -198,6 +209,10 @@ function showLearn(F, b, c) {
     document.getElementById('process').innerHTML += '<p> Learned Clause: ' + c + '</p><p>Backtrack to level ' + b + '</p>';
     document.getElementById('backtracks').innerHTML += '<p>level b = ' + b + '</p>';
     var clauseId = F.length + 1;
+    readUtterance("Learned clause ");
+    readUtterance(readNot(c));
+    readUtterance("Backtrack");
+    readUtterance("b = " + b)
     document.getElementById('Clauses').innerHTML += '<p> C' + clauseId + ': ' + c + '</p>';
     $('#learnedClauseModal').modal('show');
 }
@@ -216,4 +231,12 @@ function hideNode(nodeId) {
 }
 function showRemovedDecision(literal, value) {
     document.getElementById('process').innerHTML += '<p class="removed-decision">' + literal + ' = ' + value + ' </p>'
+}
+
+function readUtterance(text) {
+    utterance = new SpeechSynthesisUtterance(text);
+    speechSynthesis.speak(utterance);
+}
+function readNot(clause) {
+    return clause.toString().replaceAll('¬', 'not ');
 }
