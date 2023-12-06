@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/css.css">
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <script src="js/front-end.js"></script>
+    <script src="ss/algorithm.js"></script>
+    <title>CDCL Visualization Helper
+    </title>
+</head>
+
+<body>
+
+    <div class="container mt-3">
+        <!-- Unit Clauses, Decisions, and Backtracking Boxes -->
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <div id="Clauses" class="p-3 border bg-light">
+                    <strong>Clauses</strong>
+                    <p>C1: ¬x + ¬y + ¬z</p>
+                    <p>C2: ¬x + y + z</p>
+                    <p>C3: x + ¬y + ¬z</p>
+                    <p>C4: ¬x + y + ¬z</p>
+                    <p>C5: x + ¬y + z</p>
+                    <p>C6: x + y + z</p>
+                    <p>C7: ¬x + ¬y + z</p>
+                    <p>C8: x + y + ¬z</p>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="p-3 border bg-light">
+                    <strong>Implication Graph</strong>
+                    <!-- Placeholder for the graph -->
+                    <div id="graph" class="p-3 border bg-light"></div>
+                </div>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-4 mb-3">
+                <div id="Current" class="p-3 border bg-light">
+                    <strong>Process:</strong>
+                    <div id="process">
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <div class="p-3 border bg-light">
+                    <strong>Decisions:</strong>
+                    <div id="decisions">
+                    </div>
+                    <br>
+                    <Strong>Backtracks:</Strong>
+                    <div id="backtracks"></div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <button type="button" class="btn btn-primary" id="start" onclick="testCDCL()">
+                    Start
+                </button>
+            </div>
+        </div>
+
+        <!-- Decision Modal -->
+        <div class="modal" id="decisionModal" tabindex="-1" aria-labelledby="nextStepModalLabel" aria-hidden="true"
+            data-backdrop="static">
+            <div class=" modal-dialog modal-dialog-bottom-right">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="nextStepModalLabel">Make a decision</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        Assign value for literal <span id="decisionLiteral"></span>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" onclick="userDecide(true)">True</button>
+                        <button type="button" class="btn btn-primary" onclick="userDecide(false)">False</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- BCP Modal -->
+        <div id="BCPModals"></div>
+        <!-- Conflict Modal -->
+        <div class="modal" id="ConflictModal" tabindex="0" aria-labelledby="nextStepModalLabel" aria-hidden="true"
+            data-backdrop="static">
+            <div class="modal-dialog modal-dialog-bottom-right">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Conflict!</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <span id="ConflictResult"></span>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal"
+                            onclick="conflictCallback()">Analyze
+                            conflict</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- UIP Modal -->
+        <div class="modal" id="UIPModal" tabindex="0" aria-labelledby="nextStepModalLabel" aria-hidden="true"
+            data-backdrop="static">
+            <div class="modal-dialog modal-dialog-bottom-right">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">First UIP Found</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <span id="FirstUIPResult"></span>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="nextUIP()">Learn
+                            Clause</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Learned Clause Modal -->
+        <div class="modal" id="learnedClauseModal" tabindex="0" aria-labelledby="nextStepModalLabel" aria-hidden="true"
+            data-backdrop="static">
+            <div class="modal-dialog modal-dialog-bottom-right">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Learned Clause</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <span id="LearnedClauseResult"></span>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal"
+                            onclick="nextLearned()">Backtrack</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- UNSAT Modal -->
+        <div class="modal" id="confirmModal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true"
+            data-backdrop="static">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalLabel">UNSAT</h5>
+                        <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p id="modalMessage">Conflict found at level 0. UNSAT!</p>
+                    </div>
+                    <div class="modal-footer">
+                        <!-- <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button> -->
+                        <button type="button" class="btn btn-primary" id="confirmButton"
+                            onclick="location.reload();">Got it!</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and its dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        const width = 800; // Adjust as needed
+        const height = 285; // Adjust as needed
+
+        // Append the svg object to the body of the page
+        const svg = d3.select("#graph")
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+        // Initialize the nodes and links
+        const nodes = [
+            { id: 'x', fx: width / 6, fy: height / 4 },
+            { id: 'z', fx: 3 * width / 5, fy: height / 2 },
+            { id: 'k', fx: 1.8 * width / 4, fy: height / 6 },
+            { id: 'y', fx: width / 4.5, fy: 3 * height / 4 }
+        ];
+
+        var links = [];
+
+        var decisions = [];
+
+        // Add the links (arrows)
+        svg.append("defs").selectAll("marker")
+            .data(["end"]) // Unique ID for the arrow marker
+            .enter().append("marker")
+            .attr("id", String)
+            .attr("viewBox", "0 -5 10 10")
+            .attr("refX", 10) // Adjust this value to position the arrow correctly
+            .attr("refY", 0)
+            .attr("markerWidth", 6)
+            .attr("markerHeight", 6)
+            .attr("orient", "auto")
+            .append("path")
+            .attr("d", "M0,-5L10,0L0,5")
+            .attr("class", "arrow")
+            .attr("fill", "#000");
+
+        // Add the nodes
+        node = svg.selectAll(".node")
+            .data(nodes)
+            .enter().append("g")
+            .attr("class", "node");
+
+        node.append("circle")
+            .attr("r", 20);
+
+        node.append("text")
+            .attr("dy", ".35em")
+            .attr("text-anchor", "middle")
+            .text(function (d) { return d.id; });
+
+        // Let D3 compute the positions
+        const simulation = d3.forceSimulation(nodes)
+            .force("link", d3.forceLink(links).id(d => d.id))
+            .force("charge", d3.forceManyBody().strength(-200))
+            .force("center", d3.forceCenter(width / 2, height / 2));
+        const nodeRadius = 20;
+
+        simulation.on("tick", () => {
+            // update node positions
+            node
+                .attr("transform", d => `translate(${d.x},${d.y})`);
+        });
+    </script>
+</body>
+
+</html>

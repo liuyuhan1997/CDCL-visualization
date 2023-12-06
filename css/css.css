@@ -1,0 +1,76 @@
+.node circle {
+    fill: white;
+    stroke: black;
+    stroke-width: 1.5px;
+}
+
+.node {
+    opacity: 0;
+}
+
+.node text {
+    font-size: 15px;
+    font-family: sans-serif;
+}
+
+.link {
+    fill: none;
+    stroke: black;
+    stroke-width: 1.5px;
+}
+
+.link text {
+    font-size: 12px;
+    font-family: sans-serif;
+}
+
+.link-arrow {
+    fill: #000;
+}
+
+.green-literal {
+    color: #87A96B
+}
+
+.red-literal {
+    color: #fd5c63
+}
+
+.no-color-literal {
+    color: black
+}
+
+#nextStep {
+    display: none;
+}
+
+.modal-dialog-bottom-right {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    margin-right: 20px;
+    /* Adjust as needed */
+    margin-bottom: 20px;
+    /* Adjust as needed */
+    width: auto;
+    /* Adjust width as needed */
+    max-width: 100%;
+    /* Ensure it doesn't overflow the screen */
+}
+
+.modal-content {
+    min-width: 300px;
+    /* Adjust minimum width as needed */
+}
+
+.modal-backdrop {
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.red-backdrop {
+    background-color: black !important;
+}
+
+.removed-decision {
+    text-decoration: line-through
+}
